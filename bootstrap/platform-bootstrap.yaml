@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: 'git://git-server.argocd.svc.cluster.local:9418/repo.git'
-    targetRevision: HEAD
+    targetRevision: main
     path: apps
   destination:
     server: 'https://kubernetes.default.svc'
