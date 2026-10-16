@@ -2,8 +2,6 @@ apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8srequirenonroot
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   crd:
     spec:
@@ -27,25 +25,3 @@ spec:
           container.securityContext.runAsUser == 0
           msg := sprintf("Container '%v' specifies runAsUser: 0 (root), which is forbidden.", [container.name])
         }
----
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sRequireNonRoot
-metadata:
-  name: require-non-root-constraint
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  enforcementAction: deny
-  match:
-    kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    excludedNamespaces:
-      - kube-system
-      - gatekeeper-system
-      - argocd
-      - monitoring
-      - logging
-      - tracing
-      - vault
-      - trivy-system
