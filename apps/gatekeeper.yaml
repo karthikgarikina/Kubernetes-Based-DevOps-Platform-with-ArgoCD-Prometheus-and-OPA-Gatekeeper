@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gatekeeper-policies
+  name: gatekeeper-system
   namespace: argocd
   labels:
     tier: security
@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: 'git://git-server.argocd.svc.cluster.local:9418/repo.git'
     targetRevision: main
-    path: manifests/security/gatekeeper
+    path: manifests/security/gatekeeper/base
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: gatekeeper-system
@@ -22,4 +22,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - SkipDryRunOnMissingResource=true

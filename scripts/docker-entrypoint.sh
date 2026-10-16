@@ -105,10 +105,10 @@ echo "    [1/5] Waiting for OPA Gatekeeper controller..."
 kubectl rollout status deployment/gatekeeper-controller-manager -n gatekeeper-system --timeout=150s 2>/dev/null || true
 
 echo "    [2/5] Waiting for HashiCorp Vault pod to reach Ready..."
-kubectl wait --namespace vault --for=condition=Ready pod/vault-0 --timeout=180s 2>/dev/null || true
+kubectl wait --namespace vault --for=condition=Ready pod -l app.kubernetes.io/name=vault --timeout=180s 2>/dev/null || true
 
 echo "    [3/5] Executing idempotent HashiCorp Vault secrets & auth initialization..."
-VAULT_ADDR="http://vault.vault.svc.cluster.local:8200" /workspace/scripts/setup-vault.sh
+VAULT_ADDR="http://hashicorp-vault.vault.svc.cluster.local:8200" /workspace/scripts/setup-vault.sh || true
 
 echo "    [4/5] Waiting for Observability stack (Prometheus & Grafana)..."
 kubectl rollout status deployment/prometheus-stack-grafana -n monitoring --timeout=180s 2>/dev/null || true
