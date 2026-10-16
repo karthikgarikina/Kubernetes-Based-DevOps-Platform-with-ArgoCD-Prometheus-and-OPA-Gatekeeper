@@ -1,0 +1,83 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-unified-observability
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  unified-observability.json: |
+    {
+      \"annotations\": { \"list\": [] },
+      \"editable\": true,
+      \"fiscalYearStartMonth\": 0,
+      \"graphTooltip\": 1,
+      \"id\": null,
+      \"links\": [
+        {
+          \"asDropdown\": false,
+          \"icon\": \"external link\",
+          \"includeVars\": false,
+          \"keepTime\": true,
+          \"tags\": [],
+          \"targetBlank\": true,
+          \"title\": \"Open Jaeger Trace UI\",
+          \"tooltip\": \"Explore correlated distributed traces in Jaeger\",
+          \"type\": \"link\",
+          \"url\": \"http://localhost:31686/search?service=sample-microservice-api\"
+        }
+      ],
+      \"liveNow\": false,
+      \"panels\": [
+        {
+          \"title\": \"Prometheus: Sample App Request Rate (PromQL)\",
+          \"type\": \"timeseries\",
+          \"gridPos\": { \"h\": 8, \"w\": 12, \"x\": 0, \"y\": 0 },
+          \"datasource\": { \"type\": \"prometheus\", \"uid\": \"prometheus\" },
+          \"targets\": [
+            {
+              \"expr\": \"sum(rate(sample_app_http_requests_total[1m])) by (status, route)\",
+              \"legendFormat\": \"{{route}} ({{status}})\",
+              \"refId\": \"A\"
+            }
+          ]
+        },
+        {
+          \"title\": \"Prometheus: Request Latency Histogram 95th Percentile\",
+          \"type\": \"timeseries\",
+          \"gridPos\": { \"h\": 8, \"w\": 12, \"x\": 12, \"y\": 0 },
+          \"datasource\": { \"type\": \"prometheus\", \"uid\": \"prometheus\" },
+          \"targets\": [
+            {
+              \"expr\": \"histogram_quantile(0.95, sum(rate(sample_app_http_request_duration_seconds_bucket[1m])) by (le))\",
+              \"legendFormat\": \"p95 latency (s)\",
+              \"refId\": \"A\"
+            }
+          ]
+        },
+        {
+          \"title\": \"Loki: Aggregated Pod Logs (LogQL)\",
+          \"type\": \"logs\",
+          \"gridPos\": { \"h\": 10, \"w\": 24, \"x\": 0, \"y\": 8 },
+          \"datasource\": { \"type\": \"loki\", \"uid\": \"Loki\" },
+          \"targets\": [
+            {
+              \"expr\": \"{namespace=\\\"production\\\"} |= \\\"sample\\\"\",
+              \"refId\": \"A\"
+            }
+          ],
+          \"options\": {
+            \"showLabels\": false,
+            \"wrapLogMessage\": true,
+            \"enableLogDetails\": true
+          }
+        }
+      ],
+      \"refresh\": \"5s\",
+      \"schemaVersion\": 38,
+      \"style\": \"dark\",
+      \"tags\": [\"observability\", \"unified\", \"sample-app\"],
+      \"time\": { \"from\": \"now-15m\", \"to\": \"now\" },
+      \"title\": \"Unified Observability: Metrics, Logs & Traces\",
+      \"uid\": \"unified-platform-observability\"
+    }

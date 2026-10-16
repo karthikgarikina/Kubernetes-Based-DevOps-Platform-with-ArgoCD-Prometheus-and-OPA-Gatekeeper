@@ -1,0 +1,13 @@
+﻿# Test fixture: Non-compliant Pod using :latest tag
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-bad-pod-latest-tag
+  namespace: default
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      securityContext:
+        runAsUser: 10001
+        runAsNonRoot: true

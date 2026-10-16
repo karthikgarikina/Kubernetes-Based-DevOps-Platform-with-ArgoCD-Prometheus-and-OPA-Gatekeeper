@@ -1,0 +1,13 @@
+﻿# Test fixture: Compliant Pod adhering to all policies
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-good-pod
+  namespace: default
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27.1
+      securityContext:
+        runAsUser: 10001
+        runAsNonRoot: true

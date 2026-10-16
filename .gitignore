@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key

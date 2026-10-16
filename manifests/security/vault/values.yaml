@@ -1,0 +1,25 @@
+﻿# HashiCorp Vault Helm configuration with Agent Injector enabled
+server:
+  dev:
+    enabled: true
+    devRootToken: "root-token-devops-platform"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  service:
+    type: NodePort
+    nodePort: 30200
+
+injector:
+  enabled: true
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

@@ -1,0 +1,20 @@
+﻿# Trivy Operator declarative configuration
+trivy:
+  mode: Standalone
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+operator:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  scanJobsConcurrentLimit: 1
