@@ -1,16 +1,43 @@
-﻿apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: hashicorp-vault
   namespace: argocd
   labels:
     tier: security
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/karthikgarikina/Kubernetes-Based-DevOps-Platform-with-ArgoCD-Prometheus-and-OPA-Gatekeeper.git'
-    targetRevision: HEAD
-    path: manifests/security/vault
+    repoURL: 'https://helm.releases.hashicorp.com'
+    chart: vault
+    targetRevision: 0.34.1
+    helm:
+      values: |
+        server:
+          dev:
+            enabled: true
+            devRootToken: "root-token-devops-platform"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          service:
+            type: NodePort
+            nodePort: 30200
+        injector:
+          enabled: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: vault

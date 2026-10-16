@@ -1,0 +1,33 @@
+﻿apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-operational-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: platform.rules
+      rules:
+        # Alert: High CPU Usage (> 85% for 5 minutes)
+        - alert: HighCPUUsage
+          expr: (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 85
+          for: 5m
+          labels:
+            severity: warning
+            tier: platform
+          annotations:
+            summary: "High CPU Usage detected on {{ .instance }}"
+            description: "Instance {{ .instance }} CPU utilization has exceeded 85% for over 5 minutes."
+
+        # Alert: Deployment Replicas Mismatch
+        - alert: DeploymentReplicasMismatch
+          expr: kube_deployment_status_replicas_available != kube_deployment_spec_replicas
+          for: 5m
+          labels:
+            severity: critical
+            tier: workloads
+          annotations:
+            summary: "Deployment {{ .deployment }} replicas mismatch"
+            description: "Deployment {{ .deployment }} in namespace {{ .namespace }} has available replicas mismatching desired replicas."

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-server
+  namespace: argocd
+  labels:
+    app: git-server
+spec:
+  type: NodePort
+  ports:
+    - port: 9418
+      targetPort: 9418
+      nodePort: 30080
+      name: git
+  selector:
+    app: git-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-server
+  namespace: argocd
+  labels:
+    app: git-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-server
+  template:
+    metadata:
+      labels:
+        app: git-server
+    spec:
+      containers:
+        - name: git-server
+          image: alpine/git:2.45.2
+          command:
+            - "sh"
+            - "-c"
+            - "mkdir -p /git/repo.git && git init --bare /git/repo.git && git -C /git/repo.git config daemon.receivepack true && git -C /git/repo.git config receive.denyCurrentBranch ignore && exec git daemon --verbose --export-all --base-path=/git --enable=receive-pack --reuseaddr"
+          ports:
+            - containerPort: 9418
+              name: git
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi

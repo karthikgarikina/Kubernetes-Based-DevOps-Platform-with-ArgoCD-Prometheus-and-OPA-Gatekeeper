@@ -10,6 +10,7 @@ kubectl get nodes --no-headers | wc -l | grep -q '^[2-9]' && echo "PASS: Multi-n
 
 echo "[2/13] Checking ArgoCD HA Replicas..."
 kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers | wc -l | grep -q '^[2-9]' && echo "PASS: ArgoCD HA server pods >= 2"
+kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-repo-server --no-headers | wc -l | grep -q '^[2-9]' && echo "PASS: ArgoCD HA repo-server pods >= 2"
 
 echo "[3/13] Checking ArgoCD App of Apps Root..."
 kubectl get application platform-bootstrap -n argocd && echo "PASS: Root Application platform-bootstrap is active"

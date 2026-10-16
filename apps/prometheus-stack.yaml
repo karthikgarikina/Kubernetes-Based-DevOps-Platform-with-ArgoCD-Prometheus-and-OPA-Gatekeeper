@@ -1,16 +1,103 @@
-﻿apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: prometheus-stack
   namespace: argocd
   labels:
     tier: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/karthikgarikina/Kubernetes-Based-DevOps-Platform-with-ArgoCD-Prometheus-and-OPA-Gatekeeper.git'
-    targetRevision: HEAD
-    path: manifests/observability/kube-prometheus-stack
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: kube-prometheus-stack
+    targetRevision: 92.9.0
+    helm:
+      values: |
+        defaultRules:
+          create: true
+          rules:
+            etcd: false
+            kubeScheduler: false
+            kubeControllerManager: false
+        alertmanager:
+          enabled: true
+          alertmanagerSpec:
+            replicas: 1
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+        grafana:
+          enabled: true
+          adminPassword: "admin"
+          service:
+            type: NodePort
+            nodePort: 31000
+          sidecar:
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
+              labelValue: "1"
+              searchNamespace: ALL
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: true
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              access: proxy
+              url: http://loki.logging.svc.cluster.local:3100
+              isDefault: false
+              jsonData:
+                maxLines: 1000
+            - name: Jaeger
+              type: jaeger
+              access: proxy
+              url: http://jaeger-query.tracing.svc.cluster.local:16686
+              isDefault: false
+              jsonData:
+                tracesToLogs:
+                  datasourceUid: 'loki'
+                  tags: ['job', 'instance', 'pod', 'namespace']
+                  filterByTraceId: true
+        prometheus:
+          enabled: true
+          service:
+            type: NodePort
+            nodePort: 30900
+          prometheusSpec:
+            replicas: 1
+            retention: 2d
+            serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelector: {}
+            podMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelector: {}
+            ruleSelectorNilUsesHelmValues: false
+            ruleSelector: {}
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+        nodeExporter:
+          enabled: true
+        kubeStateMetrics:
+          enabled: true
+        kubeEtcd:
+          enabled: false
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeProxy:
+          enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
@@ -20,3 +107,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

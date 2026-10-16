@@ -1,7 +1,9 @@
-﻿apiVersion: templates.gatekeeper.sh/v1
+apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8sblocklatesttag
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   crd:
     spec:
@@ -30,6 +32,8 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sBlockLatestTag
 metadata:
   name: block-latest-tag-constraint
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   enforcementAction: deny
   match:

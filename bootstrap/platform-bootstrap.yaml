@@ -1,4 +1,4 @@
-﻿apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: platform-bootstrap
@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/karthikgarikina/Kubernetes-Based-DevOps-Platform-with-ArgoCD-Prometheus-and-OPA-Gatekeeper.git'
+    repoURL: 'git://git-server.argocd.svc.cluster.local:9418/repo.git'
     targetRevision: HEAD
     path: apps
   destination:

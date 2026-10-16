@@ -1,16 +1,38 @@
-﻿apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: trivy-operator
   namespace: argocd
   labels:
     tier: security
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/karthikgarikina/Kubernetes-Based-DevOps-Platform-with-ArgoCD-Prometheus-and-OPA-Gatekeeper.git'
-    targetRevision: HEAD
-    path: manifests/security/trivy
+    repoURL: 'https://aquasecurity.github.io/helm-charts'
+    chart: trivy-operator
+    targetRevision: 0.37.0
+    helm:
+      values: |
+        trivy:
+          mode: Standalone
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        operator:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          scanJobsConcurrentLimit: 1
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: trivy-system

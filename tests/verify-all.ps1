@@ -29,10 +29,11 @@ Run-Check "1. Multi-node Cluster Architecture" {
     return ($nodes -ge 2)
 }
 
-Run-Check "2. ArgoCD High Availability (HA) Server Replicas" {
-    $pods = (kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers | Measure-Object -Line).Lines
-    Write-Host "   Running argocd-server pods: $pods"
-    return ($pods -ge 2)
+Run-Check "2. ArgoCD High Availability (HA) Server & Repo-Server Replicas" {
+    $serverPods = (kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers | Measure-Object -Line).Lines
+    $repoPods = (kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-repo-server --no-headers | Measure-Object -Line).Lines
+    Write-Host "   Running argocd-server pods: $serverPods, argocd-repo-server pods: $repoPods"
+    return ($serverPods -ge 2 -and $repoPods -ge 2)
 }
 
 Run-Check "3. ArgoCD App of Apps Root Application" {

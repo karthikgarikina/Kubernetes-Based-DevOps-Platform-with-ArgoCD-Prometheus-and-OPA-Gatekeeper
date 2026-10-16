@@ -1,0 +1,52 @@
+
+services:
+  # Primary Platform Runner Service (One-command bootstrap and management daemon)
+  platform-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devops-platform-runner
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace
+    environment:
+      - CLUSTER_NAME=devops-platform
+      - ARGOCD_NAMESPACE=argocd
+      - ARGOCD_SERVER_REPLICAS=2
+      - MONITORING_NAMESPACE=monitoring
+      - LOGGING_NAMESPACE=logging
+      - TRACING_NAMESPACE=tracing
+      - VAULT_NAMESPACE=vault
+      - VAULT_DEV_ROOT_TOKEN_ID=root-token-devops-platform
+      - TRIVY_NAMESPACE=trivy-system
+      - APP_NAMESPACE=production
+      - APP_PORT=3000
+    stdin_open: true
+    tty: true
+
+  # Dedicated Validation Service (Runs complete test suite against live cluster)
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devops-platform-test
+    profiles:
+      - test
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace
+    entrypoint: ["/bin/bash", "-c", "docker network connect kind $$(hostname) 2>/dev/null || true; kind export kubeconfig --internal --name devops-platform && /workspace/tests/verify-all.sh"]
+
+  # Dedicated Cleanup Service
+  cleanup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devops-platform-cleanup
+    profiles:
+      - cleanup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace
+    entrypoint: ["/bin/bash", "/workspace/scripts/cleanup.sh"]
