@@ -13,6 +13,16 @@ fi
 
 echo "    Targeting Vault at: $VAULT_ADDR"
 
+# Wait for Vault API to be accessible
+echo "    Waiting for Vault API readiness..."
+for i in $(seq 1 45); do
+    if curl -s -f "$VAULT_ADDR/v1/sys/health" > /dev/null 2>&1; then
+        echo "    Vault API is accessible."
+        break
+    fi
+    sleep 2
+done
+
 # 1. Enable KVv2 engine if not already enabled
 AUTH_ENGINES=$(curl -s -H "X-Vault-Token: $TOKEN" "$VAULT_ADDR/v1/sys/mounts" 2>/dev/null || echo "{}")
 if ! echo "$AUTH_ENGINES" | grep -q '"secret/"'; then
