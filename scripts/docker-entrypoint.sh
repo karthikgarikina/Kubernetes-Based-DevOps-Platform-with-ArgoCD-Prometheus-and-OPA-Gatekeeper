@@ -42,11 +42,13 @@ kubectl wait --for=condition=Ready nodes --all --timeout=60s
 kubectl taint nodes devops-platform-control-plane node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
 echo "[+] Multi-node Kubernetes cluster is ready."
 
-# 3. Workload Image: Build and load sample-app image
-echo "[3/6] Building and loading sample microservice container image..."
+# 3. Workload Image: Build and load sample-app and git-server images
+echo "[3/6] Building and loading workload and git-server container images..."
 docker build -t sample-microservice-api:v1.0.0 /workspace/sample-app
 kind load docker-image sample-microservice-api:v1.0.0 --name devops-platform
-echo "[+] Image sample-microservice-api:v1.0.0 loaded into cluster nodes."
+docker build -t local-git-server:v1.0.0 /workspace/manifests/argocd
+kind load docker-image local-git-server:v1.0.0 --name devops-platform
+echo "[+] Images loaded into cluster nodes."
 
 # 4. Minimal Direct Bootstrap: Deploy ArgoCD HA, NodePort Service & In-Cluster Git Daemon
 echo "[4/6] Bootstrapping ArgoCD HA & GitOps in-cluster Git server..."
